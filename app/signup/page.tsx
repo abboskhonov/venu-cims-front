@@ -1,3 +1,4 @@
+'use client'
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { SignupForm } from "@/components/signup-form"
@@ -10,7 +11,7 @@ export default function SignupPage() {
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
             <GalleryVerticalEnd className="size-4" />
           </div>
-          Acme Inc.
+          Venu Market
         </a>
         <SignupForm />
       </div>
