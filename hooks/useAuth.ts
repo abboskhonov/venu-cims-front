@@ -40,7 +40,7 @@ export function useAuth() {
       sessionStorage.setItem('pendingEmail', data.email)
       sessionStorage.setItem('isAwaitingOTP', 'true')
     },
-    onError: (err: any) => setError(err instanceof Error ? err.message : 'Registration failed'),
+    onError: (err: Error) => setError(err instanceof Error ? err.message : 'Registration failed'),
   })
 
   // -------------------------
@@ -65,7 +65,7 @@ export function useAuth() {
       queryClient.setQueryData(['currentUser'], data.user)
       router.push('/dashboard')
     },
-    onError: (err: any) => {
+    onError: (err: Error) => {
       setError(err instanceof Error ? err.message : 'OTP verification failed')
     },
   })
@@ -80,7 +80,7 @@ export function useAuth() {
     onSuccess: () => {
       setError(null)
     },
-    onError: (err: any) => setError(err instanceof Error ? err.message : 'Failed to resend OTP'),
+    onError: (err: Error) => setError(err instanceof Error ? err.message : 'Failed to resend OTP'),
   })
 
   // -------------------------

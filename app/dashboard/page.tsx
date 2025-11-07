@@ -1,16 +1,15 @@
-import { AppSidebar } from "@/components/app-sidebar"
+'use client'
 
-import { DataTable } from "@/components/data-table"
-import { SectionCards } from "@/components/section-cards"
-import { SiteHeader } from "@/components/site-header"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
-
-import data from "./data.json"
+import { AppSidebar } from "@/components/app-sidebar";
+import { UsersTable } from "@/components/users-table";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useAdmin } from "@/hooks/useAdmin";
+import { AdminCards } from "@/components/admin-cards";
 
 export default function Page() {
+  const { users, isLoading, isError } = useAdmin();
+
   return (
     <SidebarProvider
       style={
@@ -22,19 +21,18 @@ export default function Page() {
     >
       <AppSidebar variant="sidebar" />
       <SidebarInset>
-        <SiteHeader  header="Dashboard"/>
+        <SiteHeader header="Dashboard" />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-              
-              </div>
-              <DataTable data={data} />
+            <div className="flex flex-col gap-8 py-8 md:gap-10 md:py-10">
+              <AdminCards />
+              {isLoading && <p>Loading...</p>}
+              {isError && <p>Error fetching users</p>}
+              {users && <UsersTable data={users} />}
             </div>
           </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

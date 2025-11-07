@@ -15,7 +15,6 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/useAuth'
@@ -25,7 +24,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const router = useRouter()
-  const { login, error, setError, user, isUserLoading, checkAuthStatus } = useAuth()
+  const { login, error, setError, checkAuthStatus } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     password: '',
@@ -55,7 +54,7 @@ export function LoginForm({
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [checkAuthStatus, router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value })

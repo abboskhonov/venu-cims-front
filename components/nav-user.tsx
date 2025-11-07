@@ -48,17 +48,6 @@ export function NavUser({
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system")
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      applyTheme(savedTheme)
-    }
-  }, [])
-  
-  const {logout} = useAuth()
-
   const applyTheme = (newTheme: "light" | "dark" | "system") => {
     const root = document.documentElement
     
@@ -72,6 +61,17 @@ export function NavUser({
     localStorage.setItem("theme", newTheme)
     setTheme(newTheme)
   }
+
+  useEffect(() => {
+    setMounted(true)
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      applyTheme(savedTheme)
+    }
+  }, [applyTheme])
+  
+  const {logout} = useAuth()
 
   if (!mounted) return null
 

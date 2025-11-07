@@ -5,18 +5,14 @@ import { OTPForm } from "@/components/otp-form";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState<string | null>(null);
+  const email = searchParams.get("email");
 
-  useEffect(() => {
-    const value = searchParams.get("email");
-    if (!value) {
+  if (!email) {
+    if (typeof window !== "undefined") {
       window.location.href = "/login";
-      return;
     }
-    setEmail(value);
-  }, [searchParams]);
-
-  if (!email) return null;
+    return null;
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen">
