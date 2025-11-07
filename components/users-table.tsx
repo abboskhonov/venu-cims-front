@@ -12,7 +12,6 @@ import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   deleteUser,
-  toggleUserActive,
   updateUser,
   createUser,
   type UpdateUserPayload,
@@ -66,6 +65,7 @@ export const createUserSchema = z.object({
   name: z.string().min(1),
   surname: z.string().min(1),
   password: z.string().min(6),
+  role: z.string().default("user"),
   is_active: z.boolean(),
 });
 
@@ -203,6 +203,7 @@ export function UsersTable({
     },
   ];
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: filteredData,
     columns,
@@ -249,6 +250,7 @@ export function UsersTable({
         email: email.trim(),
         surname: surname.trim(),
         password: password.trim(),
+        role: "user",
         is_active: true,
       });
     } else if (editingUser) {

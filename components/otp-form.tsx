@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -16,14 +17,14 @@ import {
 } from '@/components/ui/input-otp'
 import { useAuth } from '@/hooks/useAuth'
 
-interface OTPFormProps extends React.ComponentProps<typeof Card> {
-  email: string
-}
-
-export function OTPForm({  ...props }: OTPFormProps) {
+export function OTPForm() {
   const { verifyOTP, resendOTP, error, setError } = useAuth()
   const [otp, setOtp] = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
+
+  // ✅ Get email directly from the URL query parameter
+  const searchParams = useSearchParams()
+  const email = searchParams.get('email') || ''
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,13 +35,18 @@ export function OTPForm({  ...props }: OTPFormProps) {
       return
     }
 
-    verifyOTP.mutate({ email, code: otp })
+    if (!email) {
+      setError('Invalid or missing email')
+      return
+    }
+
+    verifyOTP.mutate({ email, otp })
   }
 
-  const handleResend = async () => {
+  const handleResend = () => {
     setError(null)
     setResendCooldown(60)
-    
+
     const timer = setInterval(() => {
       setResendCooldown((prev) => {
         if (prev <= 1) {
@@ -51,11 +57,11 @@ export function OTPForm({  ...props }: OTPFormProps) {
       })
     }, 1000)
 
-    resendOTP.mutate(email)
+    if (email) resendOTP.mutate(email)
   }
 
   return (
-    <Card {...props}>
+    <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-xl">Enter verification code</CardTitle>
         <CardDescription>We sent a 4-digit code to your email.</CardDescription>
@@ -72,15 +78,15 @@ export function OTPForm({  ...props }: OTPFormProps) {
               </InputOTPGroup>
             </InputOTP>
           </div>
-          
+
           {error && <p className="text-sm text-red-500 text-center">{error}</p>}
 
-          <Button 
-            type="submit" 
-            disabled={verifyOTP.isLoading || otp.length !== 4}
+          <Button
+            type="submit"
+            disabled={verifyOTP.isPending || otp.length !== 4}
             className="w-full"
           >
-            {verifyOTP.isLoading ? 'Verifying...' : 'Verify'}
+            {verifyOTP.isPending ? 'Verifying...' : 'Verify'}
           </Button>
 
           <div className="text-center text-sm">
@@ -88,7 +94,7 @@ export function OTPForm({  ...props }: OTPFormProps) {
             <button
               type="button"
               onClick={handleResend}
-              disabled={resendCooldown > 0 || resendOTP.isLoading}
+              disabled={resendCooldown > 0 || resendOTP.isPending}
               className="text-primary hover:underline disabled:text-muted-foreground"
             >
               {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend'}

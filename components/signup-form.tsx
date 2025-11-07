@@ -85,7 +85,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  disabled={register.isLoading}
+                  disabled={register.isPending}
                 />
               </Field>
               <Field>
@@ -97,7 +97,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   value={formData.surname}
                   onChange={handleChange}
                   required
-                  disabled={register.isLoading}
+                  disabled={register.isPending}
                 />
               </Field>
               <Field>
@@ -109,7 +109,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  disabled={register.isLoading}
+                  disabled={register.isPending}
                 />
               </Field>
               <Field>
@@ -122,7 +122,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      disabled={register.isLoading}
+                      disabled={register.isPending}
                     />
                   </Field>
                   <Field>
@@ -133,7 +133,7 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      disabled={register.isLoading}
+                      disabled={register.isPending}
                     />
                   </Field>
                 </Field>
@@ -143,12 +143,12 @@ export function SignupForm({ className, ...props }: React.ComponentProps<'div'>)
               </Field>
               {error && <p className="text-red-500 text-sm">{error}</p>}
               <Field>
-                <Button 
-                  type="submit" 
-                  disabled={register.isLoading}
+                <Button
+                  type="submit"
+                  disabled={register.isPending}
                   className="w-full"
                 >
-                  {register.isLoading ? 'Creating account...' : 'Create Account'}
+                  {register.isPending ? 'Creating account...' : 'Create Account'}
                 </Button>
                 <FieldDescription className="text-center">
                   Already have an account? <a href="/login">Login</a>

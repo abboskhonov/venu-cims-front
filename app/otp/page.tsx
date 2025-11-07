@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { GalleryVerticalEnd } from "lucide-react"
 
 import { OTPForm } from "@/components/otp-form"
@@ -12,7 +13,9 @@ export default function OTPPage() {
           </div>
           Acme Inc.
         </a>
-        <OTPForm />
+        <Suspense fallback={<div>Loading...</div>}>
+          <OTPForm />
+        </Suspense>
       </div>
     </div>
   )

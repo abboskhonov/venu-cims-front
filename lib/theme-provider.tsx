@@ -1,20 +1,3 @@
-// lib/theme-provider.tsx
-"use client"
-import { useLayoutEffect, useState } from "react"
-
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mounted, setMounted] = useState(false)
-
-  useLayoutEffect(() => {
-    
-  });(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return children
-
-  return <>{children}</>
-}
 
 // Add this script to your root layout.tsx BEFORE any other content
 export function ThemeScript() {

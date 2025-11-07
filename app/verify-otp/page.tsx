@@ -20,7 +20,7 @@ function VerifyEmailContent() {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <OTPForm email={email} />
+      <OTPForm />
     </div>
   );
 }

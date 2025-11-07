@@ -17,7 +17,6 @@ export function useAuth() {
     queryFn: getCurrentUser,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: false,
-    onError: () => setError('Not authenticated'),
   })
 
   // Query to refetch user (used by checkAuthStatus)
@@ -47,7 +46,7 @@ export function useAuth() {
   // Verify OTP mutation
   // -------------------------
   const verifyOTPMutation = useMutation({
-    mutationFn: (data: { email: string; otp: string }) => verifyOTP(data),
+    mutationFn: (data: { email: string; otp: string }) => verifyOTP({ email: data.email, code: data.otp }),
     onSuccess: (data) => {
       // ✅ Save token to localStorage only
       if (data.access_token) {
@@ -75,12 +74,12 @@ export function useAuth() {
   // -------------------------
   const resendOTPMutation = useMutation({
     mutationFn: (email: string) => {
-      return verifyOTP({ email, otp: '' }) // Backend should handle resend
+      return verifyOTP({ email, code: '' }) // Backend should handle resend
     },
     onSuccess: () => {
       setError(null)
     },
-    onError: (err: Error) => setError(err instanceof Error ? err.message : 'Failed to resend OTP'),
+    onError: () => setError('Failed to resend OTP'),
   })
 
   // -------------------------
@@ -101,7 +100,7 @@ export function useAuth() {
       queryClient.setQueryData(['currentUser'], data.user)
       router.push('/dashboard')
     },
-    onError: (err: any) => setError(err instanceof Error ? err.message : 'Login failed'),
+    onError: (err: Error) => setError(err instanceof Error ? err.message : 'Login failed'),
   })
 
   // Function to check user auth status (call this on app startup/layout)
@@ -113,7 +112,7 @@ export function useAuth() {
         return result.data
       }
       return null
-    } catch (err) {
+    } catch {
       queryClient.setQueryData(['currentUser'], null)
       return null
     }

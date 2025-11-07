@@ -4,6 +4,7 @@ import { IconHome, IconChartBar, IconShoppingCart } from "@tabler/icons-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/hooks/useAuth"
+import type { User } from "@/lib/api/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +31,17 @@ const navMain = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user, isUserLoading } = useAuth()
 
+  // Type guard to ensure user has required properties
+  const isValidUser = (user: unknown): user is User => {
+    return user !== null &&
+           user !== undefined &&
+           typeof user === 'object' &&
+           'name' in user &&
+           'email' in user &&
+           typeof (user as User).name === 'string' &&
+           typeof (user as User).email === 'string'
+  }
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -50,8 +62,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        {!isUserLoading && user ? (
-          <NavUser user={user} />
+        {!isUserLoading && isValidUser(user) ? (
+          <NavUser user={{ name: user.name, email: user.email }} />
         ) : (
           <div className="text-sm text-gray-500">Loading...</div>
         )}

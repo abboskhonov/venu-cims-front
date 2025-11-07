@@ -1,6 +1,17 @@
 import { api } from "@/lib/instance";
 import qs from "qs";
 
+// Error type for API responses
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+      detail?: string;
+    };
+  };
+  message?: string;
+}
+
 // ----------------------
 // Types
 // ----------------------
@@ -32,6 +43,8 @@ export interface AuthResponse {
   user: User;
   email: string;
   token?: string;
+  access_token?: string;
+  refresh_token?: string;
 }
 
 // ----------------------
@@ -46,10 +59,11 @@ export async function register(
     console.log("Sending request to /auth/register with:", data);
     const res = await api.post("/auth/register", data);
     return res.data;
-  } catch (err: err) {
+  } catch (err: unknown) {
+    const apiError = err as ApiError;
     console.error("Full error:", err);
-    console.error("Response:", err.response?.data);
-    throw new Error(err.response?.data?.message || "Registration failed");
+    console.error("Response:", apiError.response?.data);
+    throw new Error(apiError.response?.data?.message || "Registration failed");
   }
 }
 
@@ -59,9 +73,10 @@ export async function verifyOTP(data: VerifyOTPData): Promise<AuthResponse> {
     console.log("Sending request to /auth/verify-otp with email:", data.email);
     const res = await api.post("/auth/verify-email", data);
     return res.data;
-  } catch (err: any) {
-    console.error("OTP verification error:", err.response?.data);
-    throw new Error(err.response?.data?.message || "OTP verification failed");
+  } catch (err: unknown) {
+    const apiError = err as ApiError;
+    console.error("OTP verification error:", apiError.response?.data);
+    throw new Error(apiError.response?.data?.message || "OTP verification failed");
   }
 }
 
@@ -79,9 +94,10 @@ export async function login(data: { username: string; password: string }) {
     });
 
     return res.data;
-  } catch (err: any) {
-    console.error(err.response?.data || err.message);
-    throw new Error(err.response?.data?.detail || "Login failed");
+  } catch (err: unknown) {
+    const apiError = err as ApiError;
+    console.error(apiError.response?.data || apiError.message);
+    throw new Error(apiError.response?.data?.detail || "Login failed");
   }
 }
 
@@ -90,7 +106,8 @@ export async function getCurrentUser(): Promise<User> {
   try {
     const res = await api.get("/auth/me");
     return res.data;
-  } catch (err: any) {
-    throw new Error(err.response?.data?.message || "Not authenticated");
+  } catch (err: unknown) {
+    const apiError = err as ApiError;
+    throw new Error(apiError.response?.data?.message || "Not authenticated");
   }
 }

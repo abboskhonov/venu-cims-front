@@ -18,7 +18,7 @@ export const useSales = (search: string = "", status: string = "") => {
         const dashboardData = await getSalesDashboard(search, queryStatus);
         return {
           customers: dashboardData?.customers || [],
-          status_choices: dashboardData?.status_choices || [],
+          status_choices: dashboardData?.status_choices || [],  
           period_stats: dashboardData?.period_stats,
         };
       } else {

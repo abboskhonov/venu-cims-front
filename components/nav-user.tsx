@@ -10,12 +10,10 @@ import {
 import {
   Avatar,
   AvatarFallback,
-  AvatarImage,
 } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -38,11 +36,15 @@ export function NavUser({
   user: {
     name: string
     email: string
-    avatar: string
   }
 }) {
   const { isMobile } = useSidebar()
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null) ?? 'system'
+    }
+    return 'system'
+  })
   const [mounted, setMounted] = useState(false)
 
   const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'system') => {
@@ -61,17 +63,29 @@ export function NavUser({
     setTheme(newTheme)
   }, [])
 
+  // Initialize theme and mounted state
   useEffect(() => {
-    setMounted(true)
-    const savedTheme =
-      (localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null) ??
-      'system'
-    applyTheme(savedTheme)
-  }, [applyTheme])
+    const initializeTheme = () => {
+      const root = document.documentElement
+      if (theme === 'system') {
+        const prefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches
+        root.classList.toggle('dark', prefersDark)
+      } else {
+        root.classList.toggle('dark', theme === 'dark')
+      }
+      setMounted(true)
+    }
+
+    initializeTheme()
+  }, [theme])
 
   const { logout } = useAuth()
 
   if (!mounted) return null
+
+  const firstLetter = user.name.charAt(0).toUpperCase()
 
   return (
     <SidebarMenu>
@@ -83,9 +97,11 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-primary text-primary-foreground font-semibold">
+                  {firstLetter}
+                </AvatarFallback>
               </Avatar>
+
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
                 <span className="text-muted-foreground truncate text-xs">
@@ -104,8 +120,9 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg bg-primary text-primary-foreground font-semibold">
+                    {firstLetter}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -115,21 +132,6 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            {/*<DropdownMenuSeparator />*/}
-            <DropdownMenuGroup>
-              {/*<DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>*/}
-              {/*<DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>*/}
-              {/*<DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>*/}
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
