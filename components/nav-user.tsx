@@ -1,20 +1,17 @@
-"use client"
-import { useEffect, useState } from "react"
+'use client'
+import { useEffect, useState, useCallback } from 'react'
 import {
-  IconCreditCard,
   IconDotsVertical,
   IconLogout,
-  IconNotification,
-  IconUserCircle,
   IconMoon,
   IconSun,
   IconDevices,
-} from "@tabler/icons-react"
+} from '@tabler/icons-react'
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/components/ui/avatar"
+} from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +23,14 @@ import {
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import {useAuth} from "@/hooks/useAuth"
+} from '@/components/ui/sidebar'
+import { useAuth } from '@/hooks/useAuth'
 
 export function NavUser({
   user,
@@ -45,33 +42,34 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("system")
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
   const [mounted, setMounted] = useState(false)
 
-  const applyTheme = (newTheme: "light" | "dark" | "system") => {
+  const applyTheme = useCallback((newTheme: 'light' | 'dark' | 'system') => {
     const root = document.documentElement
-    
-    if (newTheme === "system") {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      root.classList.toggle("dark", prefersDark)
+
+    if (newTheme === 'system') {
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches
+      root.classList.toggle('dark', prefersDark)
     } else {
-      root.classList.toggle("dark", newTheme === "dark")
+      root.classList.toggle('dark', newTheme === 'dark')
     }
-    
-    localStorage.setItem("theme", newTheme)
+
+    localStorage.setItem('theme', newTheme)
     setTheme(newTheme)
-  }
+  }, [])
 
   useEffect(() => {
     setMounted(true)
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | "system" | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      applyTheme(savedTheme)
-    }
+    const savedTheme =
+      (localStorage.getItem('theme') as 'light' | 'dark' | 'system' | null) ??
+      'system'
+    applyTheme(savedTheme)
   }, [applyTheme])
-  
-  const {logout} = useAuth()
+
+  const { logout } = useAuth()
 
   if (!mounted) return null
 
@@ -99,7 +97,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -117,27 +115,27 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            {/*<DropdownMenuSeparator />*/}
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              {/*<DropdownMenuItem>
                 <IconUserCircle />
                 Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              </DropdownMenuItem>*/}
+              {/*<DropdownMenuItem>
                 <IconCreditCard />
                 Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              </DropdownMenuItem>*/}
+              {/*<DropdownMenuItem>
                 <IconNotification />
                 Notifications
-              </DropdownMenuItem>
+              </DropdownMenuItem>*/}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                {theme === "light" ? (
+                {theme === 'light' ? (
                   <IconSun />
-                ) : theme === "dark" ? (
+                ) : theme === 'dark' ? (
                   <IconMoon />
                 ) : (
                   <IconDevices />
@@ -145,20 +143,20 @@ export function NavUser({
                 Theme
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
-                <DropdownMenuItem onClick={() => applyTheme("light")}>
+                <DropdownMenuItem onClick={() => applyTheme('light')}>
                   <IconSun />
                   Light
-                  {theme === "light" && <span className="ml-auto">✓</span>}
+                  {theme === 'light' && <span className="ml-auto">✓</span>}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => applyTheme("dark")}>
+                <DropdownMenuItem onClick={() => applyTheme('dark')}>
                   <IconMoon />
                   Dark
-                  {theme === "dark" && <span className="ml-auto">✓</span>}
+                  {theme === 'dark' && <span className="ml-auto">✓</span>}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => applyTheme("system")}>
+                <DropdownMenuItem onClick={() => applyTheme('system')}>
                   <IconDevices />
                   System
-                  {theme === "system" && <span className="ml-auto">✓</span>}
+                  {theme === 'system' && <span className="ml-auto">✓</span>}
                 </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuSub>

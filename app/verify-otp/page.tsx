@@ -1,16 +1,20 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense, useEffect } from "react";
 import { OTPForm } from "@/components/otp-form";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const email = searchParams.get("email");
 
-  if (!email) {
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
+  useEffect(() => {
+    if (!email) {
+      router.push("/login");
     }
+  }, [email, router]);
+
+  if (!email) {
     return null;
   }
 

@@ -1,6 +1,6 @@
 "use client"
 import * as React from "react"
-import { IconDashboard, IconChartBar, IconShoppingCart } from "@tabler/icons-react"
+import { IconHome, IconChartBar, IconShoppingCart } from "@tabler/icons-react"
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import { useAuth } from "@/hooks/useAuth"
@@ -18,7 +18,7 @@ const navMain = [
   {
     title: "Dashboard",
     url: "/dashboard",
-    icon: IconDashboard,
+    icon: IconHome,
   },
   {
     title: "Sales",

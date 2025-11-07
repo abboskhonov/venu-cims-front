@@ -46,7 +46,7 @@ export async function register(
     console.log("Sending request to /auth/register with:", data);
     const res = await api.post("/auth/register", data);
     return res.data;
-  } catch (err: any) {
+  } catch (err: err) {
     console.error("Full error:", err);
     console.error("Response:", err.response?.data);
     throw new Error(err.response?.data?.message || "Registration failed");

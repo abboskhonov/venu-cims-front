@@ -1,6 +1,6 @@
 'use client';
 
-import { IconTrendingUp } from "@tabler/icons-react";
+import { IconTrendingUp, IconPhoneCall, IconCircleCheck, IconClipboardList } from "@tabler/icons-react";
 import {
   Card,
   CardAction,
@@ -12,13 +12,40 @@ import {
 import { useSales } from "@/hooks/useSales";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function SalesCards() {
-  const { data, isLoading, isError } = useSales();
+const stats = [
+  {
+    key: "total_customers",
+    label: "Total Customers",
+    description: "Total customers in CRM",
+    icon: IconClipboardList,
+  },
+  {
+    key: "need_to_call",
+    label: "Need to Call",
+    description: "Customers pending contact",
+    icon: IconPhoneCall,
+  },
+  {
+    key: "contacted",
+    label: "Contacted",
+    description: "Customers already contacted",
+    icon: IconCircleCheck,
+  },
+  {
+    key: "project_started",
+    label: "Project Started",
+    description: "Customers with active projects",
+    icon: IconTrendingUp,
+  },
+];
 
-  if (isLoading) {
+export function SalesCards() {
+  const { crmStats, isStatsLoading } = useSales();
+
+  if (isStatsLoading) {
     return (
       <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {stats.map((_, i) => (
           <Card key={i} className="@container/card">
             <CardHeader>
               <CardDescription>
@@ -35,9 +62,6 @@ export function SalesCards() {
               <div className="line-clamp-1 flex gap-2 font-medium">
                 <Skeleton className="h-4 w-24" />
               </div>
-              <div className="text-muted-foreground">
-                <Skeleton className="h-4 w-32" />
-              </div>
             </CardFooter>
           </Card>
         ))}
@@ -45,78 +69,35 @@ export function SalesCards() {
     );
   }
 
-  if (isError) {
+  if (!crmStats) {
     return <div>Error fetching statistics</div>;
   }
 
-  const { period_stats } = data;
-
   return (
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Today</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {period_stats.today}
-          </CardTitle>
-          <CardAction>
-            <IconTrendingUp className="h-6 w-6 text-muted-foreground" />
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            New customers today
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>This Week</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {period_stats.this_week}
-          </CardTitle>
-          <CardAction>
-            <IconTrendingUp className="h-6 w-6 text-muted-foreground" />
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            New customers this week
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>This Month</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {period_stats.this_month}
-          </CardTitle>
-          <CardAction>
-            <IconTrendingUp className="h-6 w-6 text-muted-foreground" />
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            New customers this month
-          </div>
-        </CardFooter>
-      </Card>
-      <Card className="@container/card">
-        <CardHeader>
-          <CardDescription>Last 3 Months</CardDescription>
-          <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {period_stats.last_3_months}
-          </CardTitle>
-          <CardAction>
-            <IconTrendingUp className="h-6 w-6 text-muted-foreground" />
-          </CardAction>
-        </CardHeader>
-        <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            New customers in the last 3 months
-          </div>
-        </CardFooter>
-      </Card>
+      {stats.map((stat) => {
+        const Icon = stat.icon;
+        const value = crmStats[stat.key as keyof typeof crmStats] || 0;
+
+        return (
+          <Card key={stat.key} className="@container/card">
+            <CardHeader>
+              <CardDescription>{stat.label}</CardDescription>
+              <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+                {value}
+              </CardTitle>
+              <CardAction>
+                <Icon className="h-6 w-6 text-muted-foreground" />
+              </CardAction>
+            </CardHeader>
+            <CardFooter className="flex-col items-start gap-1.5 text-sm">
+              <div className="line-clamp-1 flex gap-2 font-medium">
+                {stat.description}
+              </div>
+            </CardFooter>
+          </Card>
+        );
+      })}
     </div>
   );
 }

@@ -1,11 +1,13 @@
 // lib/theme-provider.tsx
 "use client"
-import { useEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react"
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    
+  });(() => {
     setMounted(true)
   }, [])
 

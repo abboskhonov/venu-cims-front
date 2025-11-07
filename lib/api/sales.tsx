@@ -19,6 +19,49 @@ export const getLatestCustomers = async (limit: number = 50) => {
   return response.data;
 };
 
+// NEW: Get customers filtered by status
+export const getCustomersByStatus = async (status: string) => {
+  const response = await api.get("/crm/customers/filter/status", {
+    params: {
+      status,
+    },
+  });
+  return response.data;
+};
+
+// NEW: Get customers filtered by platform
+export const getCustomersByPlatform = async (platform: string) => {
+  const response = await api.get("/crm/customers/filter/platform", {
+    params: {
+      platform,
+    },
+  });
+  return response.data;
+};
+
+// NEW: Get customers filtered by date
+export const getCustomersByDate = async (date: string) => {
+  const response = await api.get("/crm/customers/filter/date", {
+    params: {
+      date,
+    },
+  });
+  return response.data;
+};
+
+// NEW: Get customers with multiple filters
+export const getCustomersWithFilters = async (filters: {
+  search?: string;
+  status?: string;
+  platform?: string;
+  date?: string;
+} = {}) => {
+  const response = await api.get("/crm/customers", {
+    params: filters,
+  });
+  return response.data;
+};
+
 export const createCustomer = async (customerData: FormData) => {
   const response = await api.post("/crm/customers", customerData, {
     headers: {
@@ -58,6 +101,11 @@ export const updateCustomerStatus = async (id: number, status: string) => {
   const response = await api.patch(`/crm/customers/${id}/status`, {
     status,
   });
+  return response.data;
+};
+
+export const getCrmStats = async () => {
+  const response = await api.get("/crm/stats");
   return response.data;
 };
 

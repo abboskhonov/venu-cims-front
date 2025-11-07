@@ -50,7 +50,6 @@ import {
   Volume2,
   StickyNote,
   Loader2,
-  X,
 } from "lucide-react";
 import { useSales } from "@/hooks/useSales";
 import { toast } from "sonner";
@@ -124,10 +123,6 @@ const formatDate = (dateString?: string) => {
   }
 };
 
-const getLanguageLabel = (code: string) => {
-  return LANGUAGE_OPTIONS.find(opt => opt.value === code)?.label || code;
-};
-
 const getLanguageShort = (code: string) => {
   const map: Record<string, string> = {
     uz: "UZ",
@@ -194,7 +189,7 @@ export function SalesTable() {
         full_name: customer.full_name,
         phone_number: customer.phone_number,
         platform: customer.platform,
-        status: customer.status,
+        status: customer.status, // ✅ use "status", not "customer_status"
         assistant_name: customer.assistant_name || "",
         notes: customer.notes || "",
       },
@@ -233,33 +228,39 @@ export function SalesTable() {
     }
   };
 
-
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
-    const full_name = formData.get("full_name") as string;
-    const phone_number = formData.get("phone_number") as string;
-    const platform = formData.get("platform") as string;
-    const status = formData.get("status") as string;
-    const assistant_name = formData.get("assistant_name") as string;
-    const notes = formData.get("notes") as string;
 
-    if (!full_name?.trim() || !platform?.trim() || !phone_number?.trim() || !status?.trim()) {
+    const full_name = (formData.get("full_name") as string)?.trim();
+    const phone_number = (formData.get("phone_number") as string)?.trim();
+    const platform = (formData.get("platform") as string)?.trim();
+    const status = (formData.get("status") as string)?.trim(); // ✅ always "status" from form
+    const assistant_name = (formData.get("assistant_name") as string)?.trim() || "";
+    const notes = (formData.get("notes") as string)?.trim() || "";
+
+    if (!full_name || !platform || !phone_number || !status) {
       toast.error("Full name, platform, phone number, and status are required.");
       return;
     }
 
     const submitFormData = new FormData();
-    submitFormData.append("full_name", full_name.trim());
+    submitFormData.append("full_name", full_name);
     submitFormData.append("username", full_name.toLowerCase().replace(/\s+/g, "."));
-    submitFormData.append("phone_number", phone_number.trim());
-    submitFormData.append("platform", platform.trim());
-    submitFormData.append("status", status.trim());
-    submitFormData.append("assistant_name", assistant_name?.trim() || "");
-    submitFormData.append("notes", notes?.trim() || "");
-    submitFormData.append("conversation_language", selectedLanguage);
+    submitFormData.append("phone_number", phone_number);
+    submitFormData.append("platform", platform);
+
+    // ✅ Send correct field name based on mode
+    if (dialog.mode === "edit") {
+      submitFormData.append("customer_status", status);
+    } else {
+      submitFormData.append("status", status);
+    }
+
+    submitFormData.append("assistant_name", assistant_name);
+    submitFormData.append("notes", notes);
+    submitFormData.append("conversation_language", selectedLanguage || "");
 
     if (audioFile) {
       submitFormData.append("audio", audioFile, audioFile.name);
@@ -275,7 +276,7 @@ export function SalesTable() {
             setAudioFile(null);
             setAudioFileName("");
             setSelectedLanguage("");
-            (e.target as HTMLFormElement).reset();
+            e.currentTarget.reset();
           },
           onError: (error) => {
             toast.error(error instanceof Error ? error.message : "Failed to update customer");
@@ -290,7 +291,7 @@ export function SalesTable() {
           setAudioFile(null);
           setAudioFileName("");
           setSelectedLanguage("");
-          (e.target as HTMLFormElement).reset();
+          e.currentTarget.reset();
         },
         onError: (error) => {
           toast.error(error instanceof Error ? error.message : "Failed to create customer");
@@ -546,24 +547,22 @@ export function SalesTable() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="status" className="text-xs font-medium">
-                      Status
-                    </Label>
-                    <Select name="status" defaultValue={dialog.data?.status || "need_to_call"}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUS_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-xs font-medium">
+                    Status *
+                  </Label>
+                  <Select name="status" defaultValue={dialog.data?.status || "need_to_call"}>
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

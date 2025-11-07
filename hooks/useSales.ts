@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSalesDashboard, getLatestCustomers, createCustomer, updateCustomer, deleteCustomer } from "@/lib/api/sales";
+import { getSalesDashboard, getLatestCustomers, createCustomer, updateCustomer, deleteCustomer, getCrmStats } from "@/lib/api/sales";
 
 interface UpdateCustomerPayload {
   id: number;
@@ -33,10 +33,17 @@ export const useSales = (search: string = "", status: string = "") => {
     enabled: true,
   });
 
+  // Fetch CRM stats
+  const { data: crmStats, isLoading: isStatsLoading } = useQuery({
+    queryKey: ["crm-stats"],
+    queryFn: getCrmStats,
+  });
+
   const { mutate: createCustomerMutation, isPending: isCreating } = useMutation({
     mutationFn: createCustomer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["crm-stats"] });
     },
   });
 
@@ -44,6 +51,7 @@ export const useSales = (search: string = "", status: string = "") => {
     mutationFn: ({ id, data }: UpdateCustomerPayload) => updateCustomer(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["crm-stats"] });
     },
   });
 
@@ -51,6 +59,7 @@ export const useSales = (search: string = "", status: string = "") => {
     mutationFn: deleteCustomer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["crm-stats"] });
     },
   });
 
@@ -58,6 +67,8 @@ export const useSales = (search: string = "", status: string = "") => {
     data: data || { customers: [], status_choices: [] },
     isLoading,
     isError,
+    crmStats,
+    isStatsLoading,
     createCustomer: createCustomerMutation,
     isCreating,
     updateCustomer: updateCustomerMutation,
