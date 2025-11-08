@@ -1,32 +1,50 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSalesDashboard, getLatestCustomers, createCustomer, updateCustomer, deleteCustomer, getCrmStats } from "@/lib/api/sales";
+import { 
+  getLatestCustomers, 
+  getCustomersWithFilters,
+  createCustomer, 
+  updateCustomer, 
+  deleteCustomer, 
+  getCrmStats 
+} from "@/lib/api/sales";
 
 interface UpdateCustomerPayload {
   id: number;
   data: FormData;
 }
 
-export const useSales = (search: string = "", status: string = "") => {
+export const useSales = (
+  search: string = "", 
+  status: string = "all", 
+  platform: string = "all",
+  date: string = ""
+) => {
   const queryClient = useQueryClient();
-  const queryStatus = status === "all" ? "" : status;
-  const shouldUseDashboard = search !== "" || queryStatus !== "";
+  
+  // Determine if we should use filters
+  const hasFilters = search !== "" || (status !== "all" && status !== "") || (platform !== "all" && platform !== "") || date !== "";
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["sales", search, queryStatus],
+    queryKey: ["sales", search, status, platform, date],
     queryFn: async () => {
-      if (shouldUseDashboard) {
-        const dashboardData = await getSalesDashboard(search, queryStatus);
+      if (hasFilters) {
+        const filters: Record<string, string> = {};
+        
+        if (search) filters.search = search;
+        if (status !== "all" && status !== "") filters.status = status;
+        if (platform !== "all" && platform !== "") filters.platform = platform;
+        if (date) filters.date = date;
+        
+        const customersData = await getCustomersWithFilters(filters);
         return {
-          customers: dashboardData?.customers || [],
-          status_choices: dashboardData?.status_choices || [],  
-          period_stats: dashboardData?.period_stats,
+          customers: Array.isArray(customersData) ? customersData : customersData?.customers || [],
+          status_choices: customersData?.status_choices || [],
         };
       } else {
         const customersData = await getLatestCustomers();
         return {
           customers: Array.isArray(customersData) ? customersData : customersData?.customers || [],
           status_choices: [],
-          period_stats: {},
         };
       }
     },
