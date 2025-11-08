@@ -50,8 +50,6 @@ import {
   Volume2,
   StickyNote,
   Loader2,
-  Search,
-  X,
 } from "lucide-react";
 import { useSales } from "@/hooks/useSales";
 import { toast } from "sonner";
@@ -73,7 +71,6 @@ export const customerSchema = z.object({
 });
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "All Statuses" },
   { value: "need_to_call", label: "Need to Call" },
   { value: "contacted", label: "Contacted" },
   { value: "project_started", label: "Project Started" },
@@ -83,13 +80,12 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const PLATFORM_OPTIONS = [
-  { value: "all", label: "All Platforms" },
-  { value: "Instagram", label: "Instagram" },
-  { value: "WhatsApp", label: "WhatsApp" },
-  { value: "Facebook", label: "Facebook" },
-  { value: "Telegram", label: "Telegram" },
-  { value: "Email", label: "Email" },
-  { value: "Phone", label: "Phone" },
+  "Instagram",
+  "WhatsApp",
+  "Facebook",
+  "Telegram",
+  "Email",
+  "Phone",
 ] as const;
 
 const LANGUAGE_OPTIONS = [
@@ -152,22 +148,7 @@ interface DialogState {
 }
 
 export function SalesTable() {
-  // Filter states
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState("all");
-  const [platformFilter, setPlatformFilter] = React.useState("all");
-  const [dateFilter, setDateFilter] = React.useState("");
-
-  const { 
-    data: salesData, 
-    isLoading, 
-    createCustomer, 
-    isCreating, 
-    updateCustomer, 
-    isUpdating, 
-    deleteCustomer 
-  } = useSales(searchQuery, statusFilter, platformFilter, dateFilter);
-  
+  const { data: salesData, isLoading, createCustomer, isCreating, updateCustomer, isUpdating, deleteCustomer } = useSales();
   const data = salesData?.customers || [];
 
   const [pagination, setPagination] = React.useState({
@@ -208,7 +189,7 @@ export function SalesTable() {
         full_name: customer.full_name,
         phone_number: customer.phone_number,
         platform: customer.platform,
-        status: customer.status,
+        status: customer.status, // ✅ use "status", not "customer_status"
         assistant_name: customer.assistant_name || "",
         notes: customer.notes || "",
       },
@@ -247,26 +228,24 @@ export function SalesTable() {
     }
   };
 
-  const handleClearFilters = () => {
-    setSearchQuery("");
-    setStatusFilter("all");
-    setPlatformFilter("all");
-    setDateFilter("");
-  };
-
-  const hasActiveFilters = searchQuery || statusFilter !== "all" || platformFilter !== "all" || dateFilter;
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
 
-    const full_name = (formData.get("full_name") as string)?.trim();
-    const phone_number = (formData.get("phone_number") as string)?.trim();
-    const platform = (formData.get("platform") as string)?.trim();
-    const status = (formData.get("status") as string)?.trim();
-    const assistant_name = (formData.get("assistant_name") as string)?.trim() || "";
-    const notes = (formData.get("notes") as string)?.trim() || "";
+    const full_name_raw = formData.get("full_name") as string | null;
+    const phone_number_raw = formData.get("phone_number") as string | null;
+    const platform_raw = formData.get("platform") as string | null;
+    const status_raw = formData.get("status") as string | null;
+    const assistant_name_raw = formData.get("assistant_name") as string | null;
+    const notes_raw = formData.get("notes") as string | null;
+
+    const full_name = full_name_raw?.trim() || "";
+    const phone_number = phone_number_raw?.trim() || "";
+    const platform = platform_raw?.trim() || "";
+    const status = status_raw?.trim() || "";
+    const assistant_name = assistant_name_raw?.trim() || "";
+    const notes = notes_raw?.trim() || "";
 
     if (!full_name || !platform || !phone_number || !status) {
       toast.error("Full name, platform, phone number, and status are required.");
@@ -279,6 +258,7 @@ export function SalesTable() {
     submitFormData.append("phone_number", phone_number);
     submitFormData.append("platform", platform);
 
+    // ✅ Send correct field name based on mode
     if (dialog.mode === "edit") {
       submitFormData.append("customer_status", status);
     } else {
@@ -303,7 +283,7 @@ export function SalesTable() {
             setAudioFile(null);
             setAudioFileName("");
             setSelectedLanguage("");
-            e.currentTarget.reset();
+           
           },
           onError: (error) => {
             toast.error(error instanceof Error ? error.message : "Failed to update customer");
@@ -318,7 +298,7 @@ export function SalesTable() {
           setAudioFile(null);
           setAudioFileName("");
           setSelectedLanguage("");
-          e.currentTarget.reset();
+         
         },
         onError: (error) => {
           toast.error(error instanceof Error ? error.message : "Failed to create customer");
@@ -423,7 +403,6 @@ export function SalesTable() {
     },
   ];
 
-   
   const table = useReactTable({
     data,
     columns,
@@ -453,71 +432,6 @@ export function SalesTable() {
           <Plus size={16} />
           Add Customer
         </Button>
-      </div>
-
-      {/* Filters Section */}
-      <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-            <Input
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Platform Filter */}
-          <Select value={platformFilter} onValueChange={setPlatformFilter}>
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by platform" />
-            </SelectTrigger>
-            <SelectContent>
-              {PLATFORM_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Date Filter */}
-          <Input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            placeholder="Filter by date"
-          />
-        </div>
-
-        {/* Clear Filters Button */}
-        {hasActiveFilters && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearFilters}
-            className="gap-2"
-          >
-            <X size={14} />
-            Clear Filters
-          </Button>
-        )}
       </div>
 
       <div className="border rounded-lg overflow-hidden shadow-sm">
@@ -576,9 +490,7 @@ export function SalesTable() {
                   className="text-center py-8"
                 >
                   <p className="text-sm text-muted-foreground">
-                    {hasActiveFilters 
-                      ? "No customers found matching your filters."
-                      : "No customers yet. Add one to get started."}
+                    No customers yet. Add one to get started.
                   </p>
                 </TableCell>
               </TableRow>
@@ -587,32 +499,6 @@ export function SalesTable() {
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">
-          Page {pagination.pageIndex + 1} of {table.getPageCount() || 1}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div>
-
-      {/* Dialog for Add/Edit/View */}
       <Dialog open={isOpen} onOpenChange={(open) => !open && setDialog({ mode: null })}>
         <DialogContent className="max-w-md">
           {(dialog.mode === "add" || dialog.mode === "edit") && (
@@ -658,9 +544,9 @@ export function SalesTable() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {PLATFORM_OPTIONS.filter(opt => opt.value !== "all").map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
-                            {opt.label}
+                        {PLATFORM_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -677,7 +563,7 @@ export function SalesTable() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {STATUS_OPTIONS.filter(opt => opt.value !== "all").map((opt) => (
+                      {STATUS_OPTIONS.map((opt) => (
                         <SelectItem key={opt.value} value={opt.value}>
                           {opt.label}
                         </SelectItem>
